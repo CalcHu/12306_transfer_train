@@ -1,0 +1,8 @@
+*.swp
+/.settings
+/log
+/.buildpath
+/.project
+*.file
+/.idea
+/__pycache__
