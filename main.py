@@ -29,7 +29,7 @@ class main:
         # 获取输出数据
         output_data = self.get_output_data(start_code, end_code, transfer_code, is_transfer != '0')
 
-        self.output_data(output_data, cfg.getboolean('config', 'export_csv'), start_station=start_station_name,
+        self.output_data(output_data, self.config.getboolean('config', 'export_csv'), start_station=start_station_name,
                end_station=end_station_name, transfer_station=transfer_station_name)
 
     def load_station_info(self):
@@ -77,8 +77,8 @@ class main:
             title = ['始发站', '出发时间', '车次1', '到达中转站时间', '中转站', '中转站出发时间',
                                       '车次2', '终到时间', '终到站']
 
-            transfer_wait_min = cfg.getint('config','transfer_station_min_interval')
-            transfer_wait_max = cfg.getint('config','transfer_station_max_wait_minute')
+            transfer_wait_min = self.config.getint('config','transfer_station_min_interval')
+            transfer_wait_max = self.config.getint('config','transfer_station_max_wait_minute')
             for j in railway_info_dict1:
                 for k in railway_info_dict2:
                     delta = start_time2[k] - arrive_time1[j]
