@@ -6,8 +6,8 @@ import os
 
 
 class main:
-    def __init__(self, cfg):
-        self.config = cfg
+    def __init__(self, _cfg):
+        self.config = _cfg
         self.url_base = 'https://kyfw.12306.cn/otn'
         # 加载站点信息
         self.load_station_info()
@@ -25,12 +25,20 @@ class main:
         else:
             transfer_station_name = None
             transfer_code = None
-
+        if self.config.has_option('config', 'travel_data_time'):
+            date_time = self.config.get('config', 'travel_data_time')
+        else:
+            date_time = input("请输入乘车日期(按照2016-08-06的格式，如果是明天，可以直接输入0):\n")
+            if date_time == '0':
+                date_time = time.strftime('%Y-%m-%d', time.localtime(time.time()+86400))
         # 获取输出数据
-        output_data = self.get_output_data(start_code, end_code, transfer_code, is_transfer != '0')
+        output_data = self.get_output_data(start_code, end_code, date_time, transfer_code, is_transfer != '0')
 
-        self.output_data(output_data, self.config.getboolean('config', 'export_csv'), start_station=start_station_name,
+        if output_data['rows']:
+            self.output_data(output_data, self.config.getboolean('config', 'export_csv'), start_station=start_station_name,
                end_station=end_station_name, transfer_station=transfer_station_name)
+        else:
+            print ("对不起，没有查到符合条件的车次")
 
     def load_station_info(self):
         station_list = self.get_station_info_list()
@@ -53,11 +61,11 @@ class main:
         self.station_full_pinyin = station_full_pinyin
         self.station_simple_pinyin = station_simple_pinyin
 
-    def get_output_data(self, start_station_code, end_station_code, transfer_station_code=None, need_transfer=True):
+    def get_output_data(self, start_station_code, end_station_code, date_time, transfer_station_code=None, need_transfer=True):
         list_data = []
-        if need_transfer :
-            railway_info1 = self.get_railway_info(start_station_code, transfer_station_code)['data']['datas']
-            railway_info2 = self.get_railway_info(transfer_station_code, end_station_code)['data']['datas']
+        if need_transfer:
+            railway_info1 = self.get_railway_info(start_station_code, transfer_station_code, date_time)['data']['datas']
+            railway_info2 = self.get_railway_info(transfer_station_code, end_station_code, date_time)['data']['datas']
 
             arrive_time1 = {}
             start_time2 = {}
@@ -77,8 +85,8 @@ class main:
             title = ['始发站', '出发时间', '车次1', '到达中转站时间', '中转站', '中转站出发时间',
                                       '车次2', '终到时间', '终到站']
 
-            transfer_wait_min = self.config.getint('config','transfer_station_min_interval')
-            transfer_wait_max = self.config.getint('config','transfer_station_max_wait_minute')
+            transfer_wait_min = self.config.getint('config', 'transfer_station_min_interval')
+            transfer_wait_max = self.config.getint('config', 'transfer_station_max_wait_minute')
             for j in railway_info_dict1:
                 for k in railway_info_dict2:
                     delta = start_time2[k] - arrive_time1[j]
@@ -100,7 +108,7 @@ class main:
                         ])
 
         else:
-            railway_info = self.get_railway_info(start_station_code, end_station_code)['data']['datas']
+            railway_info = self.get_railway_info(start_station_code, end_station_code, date_time)['data']['datas']
             title = ['始发站', '出发时间', '车次', '终到时间', '终点站']
 
             for i in railway_info:
@@ -175,9 +183,9 @@ class main:
         print ("已选择火车站：{}\n".format(station_cn_name))
         return station_cn_name
 
-    def get_railway_info(self, start_station, end_station):
+    def get_railway_info(self, start_station, end_station, date_time):
         query_uri = self.url_base + '/lcxxcx/query?purpose_codes=ADULT&queryDate={}&from_station={}&to_station={}'\
-        .format(time.strftime('%Y-%m-%d', time.localtime(time.time()+86400)), start_station, end_station)
+        .format(date_time, start_station, end_station)
         return connection.request_server(query_uri)
 
 if __name__ == '__main__':
