@@ -14,6 +14,6 @@ config.ini的字段含义：
 * export_csv : 是否将结果导出到csv文件   true 或 false
 * transfer_station_max_wait_minute : 中转车辆间隔最大时间(分钟)，即你能忍受在中转火车站最长等待时间
 * transfer_station_min_interval : 中转车辆间隔最短时间（分钟）,即你在中转火车站等待的最短时间，建议不要小于10
-* travel_data_time : 乘车日期,按照"yyyy-mm-dd"的格式,形如:20160806;此参数为可选参数,可以不使用这个参数
+* travel_data_time : 乘车日期,按照"yyyy-mm-dd"的格式,形如:2016-08-06;此参数为可选参数,可以不使用这个参数
  
 
